@@ -1,0 +1,684 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model activations {
+  id           Int       @id @default(autoincrement()) @db.UnsignedInt
+  user_id      Int       @db.UnsignedInt
+  code         String
+  completed    Boolean   @default(false)
+  completed_at DateTime? @db.Timestamp(0)
+  created_at   DateTime? @db.Timestamp(0)
+  updated_at   DateTime? @db.Timestamp(0)
+}
+
+model activity_log {
+  id           Int       @id @default(autoincrement()) @db.UnsignedInt
+  log_name     String?
+  description  String
+  subject_id   Int?
+  subject_type String?
+  causer_id    Int?
+  causer_type  String?
+  properties   String?   @db.Text
+  created_at   DateTime? @db.Timestamp(0)
+  updated_at   DateTime? @db.Timestamp(0)
+
+  @@index([log_name], map: "activity_log_log_name_index")
+}
+
+model airlines {
+  id         Int       @id @default(autoincrement()) @db.UnsignedInt
+  name       String?
+  alias      String?
+  iata       String?
+  icao       String?
+  callsign   String?
+  country    String?
+  active     String?
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+}
+
+model airport_services {
+  id               Int       @id @default(autoincrement())
+  name             String    @db.VarChar(255)
+  description      String?   @db.VarChar(255)
+  pickup_dropoff   Boolean   @db.Bit(1)
+  pickup_date_time DateTime  @db.DateTime(0)
+  num_passengers   Int
+  pickup_from      String    @db.VarChar(255)
+  dropoff_location String    @db.VarChar(255)
+  airline          String?   @db.VarChar(255)
+  flight_number    String?   @db.VarChar(255)
+  status           Boolean   @default(dbgenerated("b'1'")) @db.Bit(1)
+  pick_up_lat      String    @db.VarChar(45)
+  drop_off_lat     String    @db.VarChar(45)
+  pick_up_lon      String    @db.VarChar(45)
+  drop_off_lon     String    @db.VarChar(45)
+  service_id       Int       @db.UnsignedInt
+  created_at       DateTime? @default(now()) @db.Timestamp(0)
+  updated_at       DateTime? @default(now()) @db.Timestamp(0)
+  services         services  @relation(fields: [service_id], references: [id], onDelete: Cascade, map: "FK_SERVICE_ID")
+
+  @@index([service_id], map: "FK_SERVICE_ID_idx")
+}
+
+model airports {
+  id                    Int       @id @default(autoincrement()) @db.UnsignedInt
+  name                  String?
+  city                  String?
+  country               String?
+  iata                  String?
+  icao                  String?
+  latitude              String?
+  longitude             String?
+  altitude              String?
+  timezone              String?
+  dst                   String?
+  tz_database_time_zone String?
+  Type                  String?
+  Source                String?
+  created_at            DateTime? @db.Timestamp(0)
+  updated_at            DateTime? @db.Timestamp(0)
+}
+
+model blog_categories {
+  id         Int       @id @default(autoincrement()) @db.UnsignedInt
+  title      String
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+  deleted_at DateTime? @db.Timestamp(0)
+}
+
+model blog_comments {
+  id         Int       @id @default(autoincrement()) @db.UnsignedInt
+  blog_id    Int       @db.UnsignedInt
+  name       String
+  email      String
+  website    String?
+  comment    String    @db.Text
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+  deleted_at DateTime? @db.Timestamp(0)
+}
+
+model blogs {
+  id               Int       @id @default(autoincrement()) @db.UnsignedInt
+  blog_category_id Int       @db.UnsignedInt
+  user_id          Int       @db.UnsignedInt
+  title            String
+  slug             String?
+  content          String    @db.Text
+  image            String?
+  views            Int       @default(0)
+  created_at       DateTime? @db.Timestamp(0)
+  updated_at       DateTime? @db.Timestamp(0)
+  deleted_at       DateTime? @db.Timestamp(0)
+}
+
+model body_types {
+  id         Int       @id @default(autoincrement()) @db.UnsignedInt
+  body_type  String?
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+  cars       cars[]
+}
+
+model car_features {
+  id         Int       @id @default(autoincrement()) @db.UnsignedInt
+  car_id     Int       @db.UnsignedInt
+  feature_id Int       @db.UnsignedInt
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+
+  @@index([car_id], map: "FK_CAR_F_idx")
+  @@index([feature_id], map: "FK_FEAT_F_idx")
+}
+
+model car_price_types {
+  id         Int          @id @default(autoincrement()) @db.UnsignedInt
+  name       String?
+  created_at DateTime?    @db.Timestamp(0)
+  updated_at DateTime?    @db.Timestamp(0)
+  car_prices car_prices[]
+}
+
+model car_prices {
+  id                Int             @id @default(autoincrement()) @db.UnsignedInt
+  car_id            Int             @db.UnsignedInt
+  car_price_type_id Int             @db.UnsignedInt
+  monday            Int?
+  tuesday           Int?
+  wednesday         Int?
+  thursday          Int?
+  friday            Int?
+  saturday          Int?
+  sunday            Int?
+  created_at        DateTime?       @db.Timestamp(0)
+  updated_at        DateTime?       @db.Timestamp(0)
+  cars              cars            @relation(fields: [car_id], references: [id], onDelete: Cascade, map: "FK_CARS_ID")
+  car_price_types   car_price_types @relation(fields: [car_price_type_id], references: [id], onDelete: Cascade, map: "FK_CPRICE_ID")
+
+  @@index([car_id], map: "FK_CAR_ID_idx")
+  @@index([car_price_type_id], map: "FK_CPRICE_ID_idx")
+}
+
+model cars {
+  id              Int               @id @default(autoincrement()) @db.UnsignedInt
+  body_type_id    Int               @db.UnsignedInt
+  transmission_id Int               @db.UnsignedInt
+  manufacturer_id Int               @db.UnsignedInt
+  driver_id       Int               @db.UnsignedInt
+  fuel_id         Int               @db.UnsignedInt
+  vehicle_type_id Int               @db.UnsignedInt
+  car_model       String?
+  name            String?
+  qty             String?
+  passenger_seats Int?
+  maximum_luggage Int?
+  total_doors     Int?
+  child_seat      Int?
+  image           String?           @db.VarChar(255)
+  status          Boolean?          @default(dbgenerated("b'1'")) @db.Bit(1)
+  per_mile_rate   Float?            @db.Float
+  hourly_rate     Float?            @db.Float
+  minimum_fare    Float?            @db.Float
+  minimum_hours   Int?
+  fixed_price     Float?            @db.Float
+  is_slab_enabled Boolean?          @default(dbgenerated("b'0'")) @db.Bit(1)
+  is_loc_enabled  Boolean?          @default(dbgenerated("b'0'")) @db.Bit(1)
+  created_at      DateTime?         @default(now()) @db.Timestamp(0)
+  updated_at      DateTime?         @default(now()) @db.Timestamp(0)
+  isActive        Boolean?          @default(true)
+  car_type        cars_car_type?    @default(Other)
+  car_prices      car_prices[]
+  body_types      body_types        @relation(fields: [body_type_id], references: [id], onDelete: Cascade, map: "FK_BODY_ID")
+  drivers         drivers           @relation(fields: [driver_id], references: [id], onDelete: Cascade, map: "FK_DRIVER_ID")
+  fuel_types      fuel_types        @relation(fields: [fuel_id], references: [id], onDelete: Cascade, map: "FK_FUEL_ID")
+  manufacturers   manufacturers     @relation(fields: [manufacturer_id], references: [id], onDelete: Cascade, map: "FK_MANUF_ID")
+  transmissions   transmissions     @relation(fields: [transmission_id], references: [id], onDelete: Cascade, map: "FK_TRANS_ID")
+  vehicle_types   vehicle_types     @relation(fields: [vehicle_type_id], references: [id], onDelete: Cascade, map: "FK_VEH_ID")
+  package_serivce package_serivce[]
+  reservations    reservations[]
+  slabs           slabs[]
+  sub_services    sub_services[]
+  tours           tours[]
+
+  @@index([body_type_id], map: "FK_BODY_ID_idx")
+  @@index([driver_id], map: "FK_DRIVER_ID_idx")
+  @@index([fuel_id], map: "FK_FUEL_ID_idx")
+  @@index([manufacturer_id], map: "FK_MANUF_ID_idx")
+  @@index([transmission_id], map: "FK_TRANS_ID_idx")
+  @@index([vehicle_type_id], map: "FK_VEH_ID_idx")
+}
+
+model city_tours {
+  id               Int      @id @default(autoincrement())
+  city_name        String   @map("city name") @db.VarChar(255)
+  pick_up_location String   @db.VarChar(255)
+  Created_on       DateTime @default(now()) @db.Timestamp(0)
+}
+
+model countries {
+  id         Int       @id @default(autoincrement()) @db.UnsignedInt
+  sortname   String
+  name       String
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+}
+
+model coupons {
+  id          Int       @id @default(autoincrement()) @db.UnsignedInt
+  coupon_name String?
+  percentage  Int?
+  price       Int?
+  status      Boolean   @db.Bit(1)
+  created_at  DateTime? @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+}
+
+model datatables {
+  id         Int       @id @default(autoincrement()) @db.UnsignedInt
+  firstname  String?
+  lastname   String?
+  email      String?
+  points     String?
+  notes      String?
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+  age        Int?
+  job        String?
+  gender     String?
+  country    String?
+  sale_date  String?
+}
+
+model drivers {
+  id         Int       @id @default(autoincrement()) @db.UnsignedInt
+  name       String?
+  created_at DateTime? @default(now()) @db.Timestamp(0)
+  updated_at DateTime? @default(now()) @db.Timestamp(0)
+  cars       cars[]
+}
+
+model features {
+  id         Int       @id @default(autoincrement()) @db.UnsignedInt
+  feature    String?
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+}
+
+model files {
+  id         Int       @id @default(autoincrement()) @db.UnsignedInt
+  filename   String
+  mime       String
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+}
+
+model fuel_types {
+  id         Int       @id @default(autoincrement()) @db.UnsignedInt
+  fuel_type  String?
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+  cars       cars[]
+}
+
+model gratuities {
+  id         Int       @id @default(autoincrement()) @db.UnsignedInt
+  percentage Int?
+  status     Boolean?  @default(dbgenerated("b'1'")) @db.Bit(1)
+  name       String?   @db.VarChar(45)
+  price      Int
+  service_id Int       @db.UnsignedInt
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+  services   services  @relation(fields: [service_id], references: [id], onDelete: Cascade, map: "FK_SERVICE_GRAT")
+
+  @@index([service_id], map: "FK_SERVICE_GRAT_idx")
+}
+
+model hourly_services {
+  id                  Int       @id @default(autoincrement())
+  name                String    @db.VarChar(255)
+  description         String?   @db.VarChar(255)
+  pickup_location     String    @db.VarChar(255)
+  pickup_date_time    DateTime  @db.DateTime(0)
+  num_passengers      Int
+  num_service_hours   Int
+  dropoff_location    String    @db.VarChar(255)
+  add_another_stop    Boolean   @default(dbgenerated("b'0'")) @db.Bit(1)
+  additional_comments String?   @db.VarChar(255)
+  status              Boolean   @default(dbgenerated("b'1'")) @db.Bit(1)
+  service_id          Int       @db.UnsignedInt
+  created_at          DateTime? @default(now()) @db.Timestamp(0)
+  updated_at          DateTime? @default(now()) @db.Timestamp(0)
+  services            services  @relation(fields: [service_id], references: [id], onDelete: Cascade, map: "FK_SERVICE_HOURLY")
+
+  @@index([service_id], map: "FK_SERVICE_HOURLY_idx")
+}
+
+model locations {
+  id               Int       @id @default(autoincrement()) @db.UnsignedInt
+  title            String?
+  pickup_location  String?
+  pickup_lat       String?
+  pickup_lng       String?
+  dropoff_location String?
+  dropoff_lat      String?
+  dropoff_lng      String?
+  fee              Float?
+  created_at       DateTime? @db.Timestamp(0)
+  updated_at       DateTime? @db.Timestamp(0)
+}
+
+model manufacturers {
+  id           Int       @id @default(autoincrement()) @db.UnsignedInt
+  Manufacturer String?   @unique(map: "Manufacturer_UNIQUE")
+  created_at   DateTime? @db.Timestamp(0)
+  updated_at   DateTime? @db.Timestamp(0)
+  cars         cars[]
+}
+
+model migrations {
+  id        Int    @id @default(autoincrement()) @db.UnsignedInt
+  migration String
+  batch     Int
+}
+
+model package_types {
+  id         Int      @id @default(autoincrement())
+  name       String   @db.VarChar(255)
+  password   String   @db.VarChar(255)
+  Created_on DateTime @default(now()) @db.Timestamp(0)
+}
+
+model persistences {
+  id         Int       @id @default(autoincrement()) @db.UnsignedInt
+  user_id    Int       @db.UnsignedInt
+  code       String    @unique(map: "persistences_code_unique")
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+}
+
+model point_to_point_services {
+  id                  Int       @id @default(autoincrement())
+  name                String    @unique(map: "name_UNIQUE") @db.VarChar(255)
+  description         String?   @db.VarChar(255)
+  pickup_location     String    @db.VarChar(255)
+  pickup_date_time    DateTime  @db.DateTime(0)
+  num_passengers      Int
+  dropoff_location    String    @db.VarChar(255)
+  add_another_stop    Boolean   @default(dbgenerated("b'0'")) @db.Bit(1)
+  additional_comments String?   @db.VarChar(255)
+  status              Boolean   @default(dbgenerated("b'1'")) @db.Bit(1)
+  pick_up_lat         String    @db.VarChar(45)
+  pick_up_lon         String    @db.VarChar(45)
+  drop_off_lat        String    @db.VarChar(45)
+  drop_off_lon        String    @db.VarChar(45)
+  service_id          Int       @db.UnsignedInt
+  created_at          DateTime? @default(now()) @db.Timestamp(0)
+  updated_at          DateTime? @default(now()) @db.Timestamp(0)
+  services            services  @relation(fields: [service_id], references: [id], onDelete: Cascade, map: "FK_SERVICE_POINT")
+
+  @@index([service_id], map: "FK_SERVICE_ID_idx")
+}
+
+model reminders {
+  id           Int       @id @default(autoincrement()) @db.UnsignedInt
+  user_id      Int       @db.UnsignedInt
+  code         String
+  completed    Boolean   @default(false)
+  completed_at DateTime? @db.Timestamp(0)
+  created_at   DateTime? @db.Timestamp(0)
+  updated_at   DateTime? @db.Timestamp(0)
+}
+
+model reservations {
+  id                   Int          @id @default(autoincrement()) @db.UnsignedInt
+  order_number         String?      @db.VarChar(45)
+  service_id           Int          @db.UnsignedInt
+  car_id               Int          @db.UnsignedInt
+  pick_up_postal_code  String?
+  pick_up_lat          Float?       @db.Float
+  pick_up_lon          Float?       @db.Float
+  pick_up_loc_name     String?      @db.VarChar(255)
+  drop_off_postal_code String?
+  drop_off_lat         Float?       @db.Float
+  drop_off_lon         Float?       @db.Float
+  drop_off_loc_name    String?      @db.VarChar(255)
+  pick_up_date         DateTime?    @db.Date
+  price                Float?       @db.Float
+  tax                  Float?       @db.Float
+  airline              String?
+  flight_no            String?
+  no_of_hours          Int?
+  maximum_passenger    Int?
+  maximum_luggage      Int?
+  customer_first_name  String?      @db.VarChar(255)
+  customer_last_name   String?      @db.VarChar(255)
+  customer_cnic        String?      @db.VarChar(255)
+  customer_email       String?      @db.VarChar(255)
+  customer_phone       String?      @db.VarChar(255)
+  created_at           DateTime?    @default(now()) @db.Timestamp(0)
+  updated_at           DateTime?    @default(now()) @db.Timestamp(0)
+  uuid                 String       @unique(map: "uuid_UNIQUE") @default(dbgenerated("(uuid())")) @db.VarChar(36)
+  payment_method       String?      @db.VarChar(45)
+  isPaid               Int?         @default(0) @db.TinyInt
+  special_instruction  String?      @db.Text
+  cars                 cars         @relation(fields: [car_id], references: [id], onDelete: Cascade, map: "FK_Car_ID")
+  sub_services         sub_services @relation(fields: [service_id], references: [id], onDelete: Cascade, map: "FK_SERVICES_RES")
+
+  @@index([car_id], map: "FK_Car_ID_idx")
+  @@index([service_id], map: "FK_SERVICES_RES_idx")
+}
+
+model role_users {
+  user_id    Int       @db.UnsignedInt
+  role_id    Int       @db.UnsignedInt
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+  roles      roles     @relation(fields: [role_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_roles_id")
+  users      users     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_users_id")
+
+  @@id([user_id, role_id])
+  @@index([role_id], map: "FK_roles_id_idx")
+}
+
+model roles {
+  id          Int          @id @default(autoincrement()) @db.UnsignedInt
+  slug        String       @unique(map: "roles_slug_unique")
+  name        String
+  permissions String?      @db.Text
+  created_at  DateTime?    @db.Timestamp(0)
+  updated_at  DateTime?    @db.Timestamp(0)
+  role_users  role_users[]
+}
+
+model services {
+  id                      Int                       @id @default(autoincrement()) @db.UnsignedInt
+  Name                    String?
+  Status                  String?
+  created_at              DateTime?                 @db.Timestamp(0)
+  updated_at              DateTime?                 @db.Timestamp(0)
+  airport_services        airport_services[]
+  gratuities              gratuities[]
+  hourly_services         hourly_services[]
+  point_to_point_services point_to_point_services[]
+  sub_services            sub_services[]
+}
+
+model sys_settings {
+  id          Int      @id @default(autoincrement())
+  sys_name    String   @db.VarChar(255)
+  sys_details String   @db.VarChar(255)
+  Created_on  DateTime @default(now()) @db.Timestamp(0)
+  setting_key String   @db.VarChar(255)
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model taggable_taggables {
+  tag_id        Int       @db.UnsignedInt
+  taggable_id   Int       @db.UnsignedInt
+  taggable_type String
+  created_at    DateTime? @db.Timestamp(0)
+  updated_at    DateTime? @db.Timestamp(0)
+
+  @@index([tag_id, taggable_id], map: "i_taggable_fwd")
+  @@index([taggable_id, tag_id], map: "i_taggable_rev")
+  @@index([taggable_type], map: "i_taggable_type")
+  @@ignore
+}
+
+model taggable_tags {
+  tag_id     Int       @id @default(autoincrement()) @db.UnsignedInt
+  name       String
+  normalized String
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+
+  @@index([normalized], map: "taggable_tags_normalized_index")
+}
+
+model tasks {
+  id               Int       @id @default(autoincrement()) @db.UnsignedInt
+  user_id          Int
+  finished         Int       @default(0) @db.TinyInt
+  task_description String    @db.Text
+  task_deadline    DateTime  @db.Date
+  created_at       DateTime? @db.Timestamp(0)
+  updated_at       DateTime? @db.Timestamp(0)
+}
+
+model throttle {
+  id         Int       @id @default(autoincrement()) @db.UnsignedInt
+  user_id    Int?      @db.UnsignedInt
+  type       String
+  ip         String?
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+
+  @@index([user_id], map: "throttle_user_id_index")
+}
+
+model tours {
+  id                  Int       @id @default(autoincrement()) @db.UnsignedInt
+  title               String?
+  pickup_location     String?
+  pickup_lat          Float?    @db.Float
+  pickup_lng          Float?    @db.Float
+  dropoff_location    String?
+  dropoff_lat         Float?    @db.Float
+  dropoff_lng         Float?    @db.Float
+  price_per_passenger Int?
+  status              Bytes?    @db.Blob
+  created_at          DateTime? @db.Timestamp(0)
+  updated_at          DateTime? @db.Timestamp(0)
+  isActive            Boolean?  @default(true)
+  car_id              Int?      @db.UnsignedInt
+  description         String?   @db.Text
+  luggage             Int?
+  cars                cars?     @relation(fields: [car_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_tours_carId")
+
+  @@index([car_id], map: "FK_tours_carId_idx")
+}
+
+model transmissions {
+  id           Int       @id @default(autoincrement()) @db.UnsignedInt
+  transmission String?
+  created_at   DateTime? @db.Timestamp(0)
+  updated_at   DateTime? @db.Timestamp(0)
+  cars         cars[]
+}
+
+model users {
+  id               Int          @id @default(autoincrement()) @db.UnsignedInt
+  email            String       @unique(map: "users_email_unique")
+  password         String
+  permissions      String?      @db.Text
+  last_login       DateTime?    @db.Timestamp(0)
+  first_name       String?
+  last_name        String?
+  bio              String?      @db.Text
+  gender           String?
+  dob              DateTime?    @db.Date
+  pic              String?
+  country          String?
+  state            String?
+  city             String?
+  address          String?
+  postal           String?
+  status           Boolean?     @default(dbgenerated("b'1'")) @db.Bit(1)
+  reset_token      String?      @db.VarChar(500)
+  token_expired_at DateTime?    @db.DateTime(0)
+  created_at       DateTime?    @db.Timestamp(0)
+  updated_at       DateTime?    @db.Timestamp(0)
+  deleted_at       DateTime?    @db.Timestamp(0)
+  role_users       role_users[]
+}
+
+model location_exceptions {
+  id                   Int       @id @default(autoincrement())
+  pick_up_loc_name     String?
+  pick_up_postal_code  String
+  drop_off_loc_name    String?
+  drop_off_postal_code String
+  price                Int
+  created_at           DateTime? @default(now()) @db.Timestamp(0)
+  updated_at           DateTime? @default(now()) @db.Timestamp(0)
+}
+
+model package_serivce {
+  id                 Int       @id @default(autoincrement()) @db.UnsignedInt
+  name               String?
+  description        String?
+  passenger_capacity Int
+  price              Int
+  created_at         DateTime? @db.Timestamp(0)
+  updated_at         DateTime? @db.Timestamp(0)
+  car_id             Int       @db.UnsignedInt
+  isActive           Boolean?  @default(true)
+  pickup_location    String?
+  pickup_lat         Float?    @db.Float
+  pickup_lng         Float?    @db.Float
+  dropoff_location   String?
+  dropoff_lat        Float?    @db.Float
+  dropoff_lng        Float?    @db.Float
+  luggage            Int?
+  cars               cars      @relation(fields: [car_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_package_carId")
+
+  @@index([car_id], map: "FK_car_id_idx")
+}
+
+model slabs {
+  id               Int       @id @default(autoincrement())
+  car_id           Int       @db.UnsignedInt
+  initial_distance Float     @db.Float
+  final_distance   Float     @db.Float
+  price            Int
+  created_at       DateTime? @default(now()) @db.Timestamp(0)
+  updated_at       DateTime? @default(now()) @db.Timestamp(0)
+  cars             cars      @relation(fields: [car_id], references: [id], onDelete: Cascade, map: "fk_car_id_slab")
+
+  @@index([car_id], map: "fk_car_id_slab_idx")
+}
+
+model timeslots {
+  id             Int           @id @default(autoincrement()) @db.UnsignedInt
+  time           DateTime?     @db.DateTime(0)
+  isActive       Boolean?      @default(true)
+  sub_service_id Int?          @db.UnsignedInt
+  created_at     DateTime?     @db.DateTime(0)
+  updated_at     DateTime?     @db.DateTime(0)
+  sub_services   sub_services? @relation(fields: [sub_service_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_subSurvice_id")
+
+  @@index([sub_service_id], map: "FK_subSurvice_id_idx")
+}
+
+model vehicle_types {
+  id         Int       @id @default(autoincrement()) @db.UnsignedInt
+  name       String    @db.VarChar(255)
+  created_at DateTime? @default(now()) @db.Timestamp(0)
+  updated_at DateTime? @default(now()) @db.Timestamp(0)
+  cars       cars[]
+}
+
+model sub_services {
+  id                  Int            @id @default(autoincrement()) @db.UnsignedInt
+  name                String?
+  pickup_location     String?
+  pickup_lat          Float?         @db.Float
+  pickup_lng          Float?         @db.Float
+  dropoff_location    String?
+  dropoff_lat         Float?         @db.Float
+  dropoff_lng         Float?         @db.Float
+  price_per_passenger Int?
+  status              Bytes?         @db.Blob
+  created_at          DateTime?      @db.Timestamp(0)
+  updated_at          DateTime?      @db.Timestamp(0)
+  isActive            Boolean?       @default(true)
+  car_id              Int?           @db.UnsignedInt
+  service_id          Int            @db.UnsignedInt
+  description         String?        @db.Text
+  luggage             Int?
+  passenger_capacity  Int?
+  reservations        reservations[]
+  services            services       @relation(fields: [service_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_sub_serviceId")
+  cars                cars?          @relation(fields: [car_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_sub_service_carId")
+  timeslots           timeslots[]
+
+  @@index([car_id], map: "FK_sub_service_carId_idx")
+  @@index([service_id], map: "FK_sub_service_serviceId_idx")
+}
+
+enum cars_car_type {
+  Other
+  Tour
+  Package
+}
